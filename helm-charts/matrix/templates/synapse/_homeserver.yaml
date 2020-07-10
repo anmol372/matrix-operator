@@ -1,0 +1,75 @@
+
+{{- define "homeserver.yaml" }}
+
+enable_registration: true
+server_name: "my.matrix.host"
+pid_file: /data/homeserver.pid
+use_presence: true
+
+federation_ip_range_blacklist:
+    - '172.16.0.0/12'
+    - '192.168.0.0/16'
+    - '100.64.0.0/10'
+    - '169.254.0.0/16'
+    - '::1/128'
+    - 'fe80::/64'
+    - 'fc00::/7'
+
+listeners:
+  - port: 8008
+    tls: false
+    type: http
+    x_forwarded: true
+
+    resources:
+      - names: [client, federation]
+        compress: false
+        
+acme:
+  enabled: false
+  port: 80
+  bind_addresses: ['::', '0.0.0.0']
+  reprovision_threshold: 30
+
+  domain: matrix.example.com
+  account_key_file: /data/acme_account.key
+
+
+database:
+# The database engine name
+    name: "psycopg2"
+    # Arguments to pass to the engine
+    args:
+        user: "{{ .Values.postgresql.username }}"
+        password: "{{ .Values.postgresql.password }}"
+        database: "{{ .Values.postgresql.database }}"
+        
+        {{- if .Values.postgresql.enabled }}
+        host: "{{ include "matrix.fullname" . }}-postgresql"
+        port: "5432"
+        {{- else }}
+        host: "{{ .Values.postgresql.hostname }}"
+        port: "{{ .Values.postgresql.port }}"
+        {{- end }}
+        cp_min: 5
+        cp_max: 10
+
+
+log_config: "/data/my.matrix.host.log.config"
+
+media_store_path: "/data/media_store"
+    
+allow_guest_access: true
+
+suppress_key_server_warning: true
+
+allow_public_rooms_over_federation: true
+
+report_stats: true
+
+macaroon_secret_key: "^2UyGuTR+zNVp1zNV~z9uMgkLV*+RDCXCPAYwl#KQ0Bz+qN9j^"
+form_secret: ":AdNU=&jKRU&u^+F9,6@E+GansKwHMK_g_QSCA=7cQ0eOR4iU7"    
+#signing_key_path: "/data/keys/my.matrix.host.signing.key"
+signing_key_path: "/data/keys/{{ .Values.matrix.serverName }}.signing.key"
+
+{{- end}}

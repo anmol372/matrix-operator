@@ -1,0 +1,270 @@
+# Runtime configuration for Synapse and settings related to the Matrix protocol
+matrix:
+  # Domain name of the server
+  # This is not necessarily the host name where the service is reachable. In fact, you may want to omit any subdomains
+  # from this value as the server name set here will be the name of your homeserver in the fediverse, and will be the
+  # domain name at the end of every user's username
+  serverName: "my.matrix.host"
+
+  # Enable anonymous telemetry to matrix.org
+  telemetry: false
+
+  # Hostname where Synapse can be reached.
+  # This is *optional* if an Ingress is configured below. If hostname is unspecified, the Synapse hostname of the
+  # Ingress will be used
+  # hostname: "matrix.example.com"
+
+  # Set to false to disable presence (online/offline indicators)
+  presence: true
+
+  # Set to true to block non-admins from inviting users to any rooms
+  blockNonAdminInvites: false
+
+  # Set to false to disable message searching
+  search: true
+
+  # Email address of the administrator
+  adminEmail: "admin@example.com"
+
+  # Settings related to image and multimedia uploads
+  uploads:
+    # Max upload size in bytes
+    maxSize: 10M
+
+    # Max image size in pixels
+    maxPixels: 32M
+
+  # Settings related to federation
+  federation:
+    # Set to false to disable federation and run an isolated homeserver
+    enabled: true
+
+    # Set to false to disallow members of other homeservers from fetching *public* rooms
+    allowPublicRooms: true
+
+    # Whitelist of domains to federate with (comment for all domains except blacklisted)
+    # whitelist: []
+
+    # IP addresses to blacklist federation requests to
+    blacklist:
+      - '127.0.0.0/8'
+      - '10.0.0.0/8'
+      - '172.16.0.0/12'
+      - '192.168.0.0/16'
+      - '100.64.0.0/10'
+      - '169.254.0.0/16'
+      - '::1/128'
+      - 'fe80::/64'
+      - 'fc00::/7'
+
+  # User registration settings
+  registration:
+    # Allow new users to register an account
+    enabled: false
+
+    # If set, allows registration of standard or admin accounts by anyone who
+    # has the shared secret, even if registration is otherwise disabled.
+    #
+    # sharedSecret: <PRIVATE STRING>
+
+    # Allow users to join rooms as a guest
+    allowGuests: false
+
+    # Required "3PIDs" - third-party identifiers such as email or msisdn (SMS)
+    # required3Pids:
+    #   - email
+    #   - msisdn
+
+    # Rooms to automatically join all new users to
+    autoJoinRooms: []
+    # - "#welcome:example.com"
+
+  # Settings for the URL preview crawler
+  urlPreviews:
+    # Enable URL previews.
+    # WARNING: Make sure to review the default rules below to ensure that users cannot crawl
+    # sensitive internal endpoints in your cluster.
+    enabled: false
+
+    # Blacklists and whitelists for the URL preview crawler
+    rules:
+      # Maximum size of a crawlable page. Keep this low to prevent a DOS vector
+      maxSize: 10M
+
+      # Whitelist and blacklist for crawlable IP addresses
+      ip:
+        # whitelist:
+        blacklist:
+          - '127.0.0.0/8'
+          - '10.0.0.0/8'
+          - '172.16.0.0/12'
+          - '192.168.0.0/16'
+          - '100.64.0.0/10'
+          - '169.254.0.0/16'
+          - '::1/128'
+          - 'fe80::/64'
+          - 'fc00::/7'
+
+      # Whitelist and blacklist based on URL pattern matching
+      url: {}
+        # whitelist:
+        # blacklist:
+        #  # blacklist any URL with a username in its URI
+        #  - username: '*'
+        #
+        #  # blacklist all *.google.com URLs
+        #  - netloc: 'google.com'
+        #  - netloc: '*.google.com'
+        #
+        #  # blacklist all plain HTTP URLs
+        #  - scheme: 'http'
+        #
+        #  # blacklist http(s)://www.acme.com/foo
+        #  - netloc: 'www.acme.com'
+        #    path: '/foo'
+        #
+        #  # blacklist any URL with a literal IPv4 address
+        #  - netloc: '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'
+
+  security:
+    # a secret which is used to sign access tokens. If none is specified,
+    # the registration_shared_secret is used, if one is given; otherwise,
+    # a secret key is derived from the signing key.
+    #
+    # macaroonSecretKey: <PRIVATE STRING>
+
+    # This disables the warning that is emitted when the
+    # trustedKeyServers include 'matrix.org'. See below.
+    # Set to false to re-enable the warning.
+    #
+    surpressKeyServerWarning: true
+
+    # The trusted servers to download signing keys from.
+    #
+    # When we need to fetch a signing key, each server is tried in parallel.
+    #
+    # Normally, the connection to the key server is validated via TLS certificates.
+    # Additional security can be provided by configuring a `verify key`, which
+    # will make synapse check that the response is signed by that key.
+    #
+    # This setting supercedes an older setting named `perspectives`. The old format
+    # is still supported for backwards-compatibility, but it is deprecated.
+    #
+    # 'trustedKeyServers' defaults to matrix.org, but using it will generate a
+    # warning on start-up. To suppress this warning, set
+    # 'surpressKeyServerWarning' to true.
+    #
+    # Options for each entry in the list include:
+    #
+    #    serverName: the name of the server. required.
+    #
+    #    verifyKeys: an optional map from key id to base64-encoded public key.
+    #       If specified, we will check that the response is signed by at least
+    #       one of the given keys.
+    #
+    #    acceptKeysInsecurely: a boolean. Normally, if `verify_keys` is unset,
+    #       and federation_verify_certificates is not `true`, synapse will refuse
+    #       to start, because this would allow anyone who can spoof DNS responses
+    #       to masquerade as the trusted key server. If you know what you are doing
+    #       and are sure that your network environment provides a secure connection
+    #       to the key server, you can set this to `true` to override this
+    #       behaviour.
+    #
+    # An example configuration might look like:
+    #
+    # trustedKeyServers:
+    #   - serverName: my_trusted_server.example.com
+    #     verifyKeys:
+    #       - id: "ed25519:auto"
+    #         key: "abcdefghijklmnopqrstuvwxyzabcdefghijklmopqr"
+    #     acceptKeysInsecurely: false
+    #   - serverName: my_other_trusted_server.example.com
+
+  logging:
+    # Root log level is the default log level for log outputs that do not have more
+    # specific settings.
+    rootLogLevel: WARNING
+    # beware: increasing this to DEBUG will make synapse log sensitive
+    # information such as access tokens.
+    sqlLogLevel: WARNING
+    # The log level for the synapse server
+    synapseLogLevel: WARNING
+
+# Persistent volumes configuration
+volumes:
+  # Uploaded attachments/multimedia
+  media:
+    # Capacity of the media persistent volume claim
+    capacity: 10Gi
+    # Storage class (optional)
+    storageClass: ""
+  signingKey:
+    # Capacity of the signing key PVC
+    # Note: 1Mi is more than enough, but some cloud providers set a minimum PVC size of 1Mi or 1Gi, adjust as necessary
+    capacity: 1Mi
+    # Storage class (optional)
+    storageClass: ""
+
+ingress:
+  enabled: true
+  # Whether to expose the federation API behind the Ingress
+  # If you would rather use an external proxy to run federation on a port other than 443, set this to false and set the synapse.service.federation.type value to either LoadBalancer or NodePort
+  federation: true
+  tls: []
+  hosts:
+    synapse: matrix.chart-example.local
+    riot: riot.chart-example.local
+    federation: matrix-fed.chart-example.local
+  annotations:
+    # This annotation is required for the Nginx ingress provider. You can remove it if you use a different ingress provider
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_intercept_errors off;
+
+# PostgreSQL Database Configuration
+postgresql:
+  # Whether to deploy the stable/postgresql chart with this chart. If disabled, make sure PostgreSQL is available at the hostname below and credentials are configured below
+  enabled: true
+
+  username: matrix
+  password: matrix
+  database: matrix
+
+  # Set this if postgresql.enabled = false
+  hostname: ""
+  port: 5432
+
+  # Storage to allocate for stable/postgresql
+  persistence:
+    size: 8Gi
+
+  # If postgresql.enabled, stable/postgresql will run the scripts in templates/postgresql/initdb-configmap.yaml
+  # If using an external Postgres server, make sure to configure the database as specified at https://github.com/matrix-org/synapse/blob/master/docs/postgres.md
+  initdbScriptsConfigMap: "{{ .Release.Name }}-postgresql-initdb"
+
+  securityContext:
+    enabled: true
+    runAsUser: 1000
+    fsGroup: 1000
+
+# Synapse Kubernetes resource settings
+synapse:
+  image:
+    repository: "matrixdotorg/synapse"
+    tag: v1.15.0
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+    federation:
+      type: ClusterIP
+      port: 80
+  replicaCount: 1
+  resources: {}
+  # Configure timings for readiness, startup, and liveness probes here...
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+networkPolicies:
+  enabled: true

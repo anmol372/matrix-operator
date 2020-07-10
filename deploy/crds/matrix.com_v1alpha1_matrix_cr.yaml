@@ -1,0 +1,107 @@
+apiVersion: matrix.com/v1alpha1
+kind: Matrix
+metadata:
+  name: example-matrix
+spec:
+  # Default values copied from <project_dir>/helm-charts/matrix/values.yaml
+  
+  fullnameOverride: ""
+  imagePullSecrets: []
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        proxy_intercept_errors off;
+    enabled: true
+    federation: true
+    hosts:
+      federation: matrix-fed.chart-example.local
+      riot: riot.chart-example.local
+      synapse: matrix.chart-example.local
+    tls: []
+  matrix:
+    adminEmail: admin@example.com
+    blockNonAdminInvites: false
+    federation:
+      allowPublicRooms: true
+      blacklist:
+      - 127.0.0.0/8
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+      - 100.64.0.0/10
+      - 169.254.0.0/16
+      - ::1/128
+      - fe80::/64
+      - fc00::/7
+      enabled: true
+    logging:
+      rootLogLevel: WARNING
+      sqlLogLevel: WARNING
+      synapseLogLevel: WARNING
+    presence: true
+    registration:
+      allowGuests: false
+      autoJoinRooms: []
+      enabled: false
+    search: true
+    security:
+      surpressKeyServerWarning: true
+    serverName: my.matrix.host
+    telemetry: false
+    uploads:
+      maxPixels: 32M
+      maxSize: 10M
+    urlPreviews:
+      enabled: false
+      rules:
+        ip:
+          blacklist:
+          - 127.0.0.0/8
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+          - 100.64.0.0/10
+          - 169.254.0.0/16
+          - ::1/128
+          - fe80::/64
+          - fc00::/7
+        maxSize: 10M
+        url: {}
+  nameOverride: ""
+  networkPolicies:
+    enabled: true
+  postgresql:
+    database: matrix
+    enabled: true
+    hostname: ""
+    initdbScriptsConfigMap: '{{ .Release.Name }}-postgresql-initdb'
+    password: matrix
+    persistence:
+      size: 8Gi
+    port: 5432
+    securityContext:
+      enabled: true
+      fsGroup: 1000
+      runAsUser: 1000
+    username: matrix
+  synapse:
+    image:
+      pullPolicy: IfNotPresent
+      repository: matrixdotorg/synapse
+      tag: v1.15.0
+    replicaCount: 1
+    resources: {}
+    service:
+      federation:
+        port: 80
+        type: ClusterIP
+      port: 80
+      type: ClusterIP
+  volumes:
+    media:
+      capacity: 10Gi
+      storageClass: ""
+    signingKey:
+      capacity: 1Mi
+      storageClass: ""
+  
